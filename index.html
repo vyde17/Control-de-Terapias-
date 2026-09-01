@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2b8fb8">
+<meta name="description" content="Control de terapias de fisioterapia a domicilio">
+<link rel="manifest" href="manifest.json">
+<title>Control de Terapias</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#18334a;--blue:#e9f6fb;--strong:#2b8fb8;--gold:#d8a84b;--cream:#fffdf8;--line:#dce9ef;--danger:#a53e3e}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#f5fafb;color:var(--ink);font-family:"DM Sans",sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}input,select,textarea{outline:none}
+input:focus,select:focus,textarea:focus{border-color:#58a9ca!important;box-shadow:0 0 0 3px #58a9ca29}
+.app{min-height:100vh;padding-bottom:88px}.frame{max-width:950px;margin:auto;padding:22px 20px}
+.serif{font-family:Fraunces,serif}.gold-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);display:inline-block}
+.page{display:none;animation:rise .2s ease}.page.active{display:block}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--line);padding:7px 2px calc(7px + env(safe-area-inset-bottom))}
+.nav button{border:0;background:#fff;color:#6a8494;border-radius:12px;padding:7px 5px;font-size:10px;font-weight:700}.nav button.active{background:#e7f5fa;color:#237da3}
+.card,.item{background:#fff;border:1px solid #deebf0;border-radius:20px;box-shadow:0 10px 30px #1b485e14}.card{padding:18px}.item{width:100%;padding:15px;text-align:left;margin-top:10px}
+.primary{border:0;border-radius:14px;background:var(--strong);color:#fff;padding:12px 16px;font-weight:700}.secondary{border:1px solid #bcdbe7;background:#fff;color:#277fa5;border-radius:12px;padding:10px 13px;font-weight:700}
+.muted{color:#668092;font-size:14px}.pill{display:inline-block;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:700}.Programada{background:#e7f4f9;color:#28647e}.Confirmada{background:#e6f6ec;color:#23714b}.Realizada{background:#fff1d3;color:#855a12}.Cancelada{background:#fde9e9;color:#a53e3e}.Reprogramada{background:#f0eafa;color:#6c4e9a}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 6px}input,select,textarea{width:100%;border:1px solid #cfe1e9;border-radius:12px;background:#fff;padding:12px}
+.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:12px;background:#0b26358a;backdrop-filter:blur(4px)}.modal.open{display:flex}
+.panel{width:100%;max-width:600px;max-height:92vh;overflow:auto;border-radius:26px;background:#fff;padding:20px}
+.close{border:0;background:#f3f7f8;border-radius:12px;padding:9px}.hidden{display:none!important}
+.progress{height:9px;background:#e6f0f4;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:var(--gold)}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar b{font-size:10px;color:#7691a0;text-align:center}.day{min-height:42px;border:0;border-radius:11px;background:#fff;color:var(--ink);font-weight:700;position:relative}.day.today{box-shadow:inset 0 0 0 2px var(--gold)}.day.selected{background:var(--strong);color:#fff}.dot{position:absolute;bottom:5px;left:50%;width:5px;height:5px;border-radius:50%;background:var(--gold);transform:translateX(-50%)}.day.selected .dot{background:#fff}
+.toast{position:fixed;left:16px;right:16px;bottom:92px;z-index:30;background:var(--ink);color:#fff;text-align:center;padding:12px;border-radius:14px;display:none}.toast.show{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(min-width:768px){.nav{max-width:950px;left:50%;right:auto;width:100%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="app"><div class="frame">
+<header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+<div><div class="muted" style="font-size:11px;font-weight:700;letter-spacing:.14em"><span class="gold-dot"></span> FISIOTERAPIA A DOMICILIO</div><h1 class="serif" style="margin:4px 0;font-size:27px">Control de Terapias</h1></div>
+<button class="primary" style="width:46px;height:46px;padding:0;font-size:25px" onclick="newAppointment()">＋</button>
+</header>
+
+<section id="page-today" class="page active">
+<div class="card" style="background:#2b8fb8;color:#fff"><div id="todayDate" style="font-size:14px"></div><div style="display:flex;justify-content:space-between;align-items:end;margin-top:18px"><div><div style="opacity:.9">Citas de hoy</div><div id="todayCount" class="serif" style="font-size:42px;font-weight:700">0</div></div><div style="text-align:right"><div style="opacity:.9">Próxima</div><b id="nextAppointment">Sin citas próximas</b></div></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:25px"><h2 class="serif">Agenda de hoy</h2><button class="secondary" onclick="newAppointment()">Nueva cita</button></div>
+<div id="todayList"></div>
+</section>
+
+<section id="page-calendar" class="page">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 class="serif">Calendario</h2><button class="primary" onclick="newAppointment()">＋</button></div>
+<div class="card" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center"><button class="secondary" onclick="month(-1)">‹</button><b id="calendarPeriod"></b><button class="secondary" onclick="month(1)">›</button></div><div id="calendar" style="margin-top:15px"></div></div>
+<div class="grid3" style="margin-top:12px"><button id="modeDay" class="primary" onclick="setMode('day')">Día</button><button id="modeWeek" class="secondary" onclick="setMode('week')">Semana</button><button id="modeMonth" class="secondary" onclick="setMode('month')">Mes</button></div>
+<div id="calendarList" style="margin-top:14px"></div>
+</section>
+
+<section id="page-patients" class="page">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 class="serif">Pacientes</h2><button class="primary" onclick="newPatient()">＋</button></div>
+<input id="patientSearch" style="margin-top:14px" placeholder="Buscar paciente..." oninput="renderPatients()"><div id="patientList"></div>
+</section>
+
+<section id="page-sessions" class="page"><h2 class="serif">Sesiones</h2><p class="muted">Control del progreso de cada paciente.</p><div id="sessionList"></div></section>
+
+<section id="page-payments" class="page"><h2 class="serif">Pagos</h2>
+<div class="grid3" style="margin-top:12px"><button id="incomeDay" class="secondary" onclick="income('day')">Día</button><button id="incomeWeek" class="secondary" onclick="income('week')">Semana</button><button id="incomeMonth" class="primary" onclick="income('month')">Mes</button></div>
+<div class="card" style="margin-top:14px;background:#2b8fb8;color:#fff"><div style="opacity:.9">TOTAL RECAUDADO</div><div id="incomeTotal" class="serif" style="font-size:40px;font-weight:700;margin-top:4px">$0</div><div id="incomeCount" style="opacity:.9">0 terapias realizadas</div></div><div id="incomeBreakdown"></div>
+</section>
+
+<section id="page-settings" class="page"><h2 class="serif">Configuración</h2><p class="muted">Tarifas y respaldo de tus datos.</p>
+<div class="card" style="margin-top:14px"><h3>Tarifas</h3><div class="item"><b>Particular</b><p id="ratePrivate" class="muted"></p><button class="secondary" onclick="editRate('Particular')">Editar tarifa</button></div><div class="item"><b>IPS</b><p id="rateIps" class="muted"></p><button class="secondary" onclick="editRate('IPS')">Editar tarifa</button></div></div>
+<div class="card" style="margin-top:14px"><h3>Respaldo</h3><p class="muted">Guarda una copia de pacientes, citas y tarifas en tu teléfono.</p><button class="primary" onclick="exportData()">Exportar respaldo</button><button class="secondary" style="margin-left:6px" onclick="importData()">Importar respaldo</button><input id="backupFile" type="file" accept=".json" class="hidden" onchange="readBackup(event)"></div>
+</section>
+</div></div>
+
+<nav class="nav">
+<button class="active" onclick="showPage('today',this)">⌂<br>Hoy</button><button onclick="showPage('calendar',this)">▦<br>Calendario</button><button onclick="showPage('patients',this)">♙<br>Pacientes</button><button onclick="showPage('sessions',this)">☷<br>Sesiones</button><button onclick="showPage('payments',this)">▣<br>Pagos</button><button onclick="showPage('settings',this)">⚙<br>Config.</button>
+</nav>
+
+<div id="modal" class="modal"><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center"><h2 id="modalTitle" class="serif"></h2><button class="close" onclick="closeModal()">✕</button></div><div id="modalBody"></div></div></div><div id="toast" class="toast"></div>
+<script>
+const KEY='control_terapias_complete_v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{patients:[],appointments:[],rates:{Particular:80000,IPS:20000}};
+let calDate=new Date(),calMode='day',editing=null,incomeMode='month';
+const $=id=>document.getElementById(id);
+const today=()=>{let d=new Date();return iso(d)};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const money=n=>new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(Number(n)||0);
+const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const patient=id=>db.patients.find(p=>p.id===id);
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2500)}
+function showPage(name,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+name).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render()}
+function render(){renderToday();renderCalendar();renderPatients();renderSessions();renderPayments();$('ratePrivate').textContent=money(db.rates.Particular)+' COP';$('rateIps').textContent=money(db.rates.IPS)+' COP'}
+function appointmentCard(a){let p=patient(a.patientId);return `<button class="item" onclick="editAppointment('${a.id}')"><div style="display:flex;gap:13px"><b style="color:#277fa5">${esc(a.time)}</b><div style="flex:1"><div style="display:flex;justify-content:space-between;gap:5px"><b>${esc(a.patientName)}</b><span class="pill ${esc(a.status)}">${esc(a.status)}</span></div><div class="muted">Sesión ${a.session}/${p?.total||'—'} · ${esc(a.type||p?.type||'Particular')}</div></div></div></button>`}
+function renderToday(){let d=db.appointments.filter(a=>a.date===today()).sort((a,b)=>a.time.localeCompare(b.time));$('todayDate').textContent=new Intl.DateTimeFormat('es-CO',{dateStyle:'full'}).format(new Date(today()+'T12:00'));$('todayCount').textContent=d.length;$('nextAppointment').textContent=d[0]?d[0].time+' · '+d[0].patientName:'Sin citas próximas';$('todayList').innerHTML=d.map(appointmentCard).join('')||'<div class="card muted">No hay citas programadas para hoy.</div>'}
+function renderCalendar(){let y=calDate.getFullYear(),m=calDate.getMonth(),selected=iso(calDate);$('calendarPeriod').textContent=new Intl.DateTimeFormat('es-CO',{month:'long',year:'numeric'}).format(calDate);let first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),off=(first.getDay()+6)%7,h='<div class="calendar">';['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(x=>h+=`<b>${x}</b>`);for(let i=0;i<off;i++)h+='<span></span>';for(let d=1;d<=days;d++){let s=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,n=db.appointments.filter(a=>a.date===s).length;h+=`<button class="day ${s===today()?'today':''} ${s===selected?'selected':''}" onclick="selectDate('${s}')">${d}${n?'<span class="dot"></span>':''}</button>`}h+='</div>';$('calendar').innerHTML=h;renderCalendarList()}
+function renderCalendarList(){let arr=db.appointments;let d=calDate;if(calMode==='day')arr=arr.filter(a=>a.date===iso(d));else if(calMode==='week'){let start=new Date(d);start.setDate(d.getDate()-((d.getDay()+6)%7));let end=new Date(start);end.setDate(start.getDate()+6);arr=arr.filter(a=>a.date>=iso(start)&&a.date<=iso(end))}else{let k=iso(d).slice(0,7);arr=arr.filter(a=>a.date.startsWith(k))}arr.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));$('calendarList').innerHTML=arr.map(a=>`<div>${calMode!=='day'?`<div class="muted" style="margin-top:10px">${formatDate(a.date)}</div>`:''}${appointmentCard(a)}</div>`).join('')||'<div class="card muted">No hay citas en este periodo.</div>'}
+function formatDate(s){return new Intl.DateTimeFormat('es-CO',{weekday:'long',day:'numeric',month:'long'}).format(new Date(s+'T12:00'))}
+function selectDate(s){calDate=new Date(s+'T12:00');calMode='day';setModeButtons();renderCalendar()}
+function month(n){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+n,1);renderCalendar()}
+function setMode(m){calMode=m;setModeButtons();renderCalendarList()}
+function setModeButtons(){['day','week','month'].forEach(x=>{$('mode'+x[0].toUpperCase()+x.slice(1)).className=x===calMode?'primary':'secondary'})}
+function renderPatients(){let q=($('patientSearch').value||'').toLowerCase();let ps=db.patients.filter(p=>(p.name+' '+p.phone).toLowerCase().includes(q));$('patientList').innerHTML=ps.map(p=>{let done=db.appointments.filter(a=>a.patientId===p.id&&a.status==='Realizada').length,pct=p.total?Math.min(100,Math.round(done/p.total*100)):0;return `<button class="item" onclick="editPatient('${p.id}')"><div style="display:flex;justify-content:space-between"><div><b>${esc(p.name)}</b><div class="muted">${esc(p.phone)} · ${p.type}</div></div><b>${done}/${p.total}</b></div><div class="progress" style="margin-top:12px"><div style="width:${pct}%"></div></div><div class="muted" style="margin-top:6px">${done} realizadas · ${Math.max(0,p.total-done)} pendientes</div></button>`}).join('')||'<div class="card muted">No hay pacientes registrados.</div>'}
+function renderSessions(){$('sessionList').innerHTML=db.patients.map(p=>{let done=db.appointments.filter(a=>a.patientId===p.id&&a.status==='Realizada').length,pending=Math.max(0,p.total-done),pct=p.total?Math.min(100,Math.round(done/p.total*100)):0;return `<div class="card" style="margin-top:12px"><div style="display:flex;justify-content:space-between"><b>${esc(p.name)}</b><span class="pill ${pending<=2&&pending>0?'Realizada':''}">${pending} pendientes</span></div><div class="muted" style="margin:8px 0">Total: ${p.total} sesiones · ${pct}% completado</div><div class="progress"><div style="width:${pct}%"></div></div></div>`}).join('')||'<div class="card muted">Crea un paciente para empezar.</div>'}
+function income(mode){incomeMode=mode;['day','week','month'].forEach(x=>$('income'+x[0].toUpperCase()+x.slice(1)).className=x===mode?'primary':'secondary');renderPayments()}
+function renderPayments(){let now=new Date(),arr=db.appointments.filter(a=>a.status==='Realizada');if(incomeMode==='day')arr=arr.filter(a=>a.date===today());if(incomeMode==='month')arr=arr.filter(a=>a.date.startsWith(today().slice(0,7)));if(incomeMode==='week'){let st=new Date(now);st.setDate(now.getDate()-((now.getDay()+6)%7));let en=new Date(st);en.setDate(st.getDate()+6);arr=arr.filter(a=>a.date>=iso(st)&&a.date<=iso(en))}let total=arr.reduce((s,a)=>s+Number(a.rate||0),0);$('incomeTotal').textContent=money(total);$('incomeCount').textContent=arr.length+' terapias realizadas';let p=arr.filter(a=>patient(a.patientId)?.type==='Particular').reduce((s,a)=>s+a.rate,0),i=arr.filter(a=>patient(a.patientId)?.type==='IPS').reduce((s,a)=>s+a.rate,0);$('incomeBreakdown').innerHTML=`<div class="card" style="margin-top:12px"><b>Particulares</b><div class="muted">${arr.filter(a=>patient(a.patientId)?.type==='Particular').length} terapias</div><h3>${money(p)}</h3></div><div class="card" style="margin-top:12px"><b>IPS</b><div class="muted">${arr.filter(a=>patient(a.patientId)?.type==='IPS').length} terapias</div><h3>${money(i)}</h3></div>`}
+function newAppointment(){editAppointment(null)}
+function editAppointment(id){editing=id;let a=id?db.appointments.find(x=>x.id===id):null;$('modalTitle').textContent=a?'Editar cita':'Nueva cita';let opts=db.patients.map(p=>`<option value="${p.id}" ${p.id===a?.patientId?'selected':''}>${esc(p.name)}</option>`).join('');$('modalBody').innerHTML=`<form onsubmit="saveAppointment(event)"><label>Paciente</label><select id="fPatient" required>${opts||'<option value="">Primero crea un paciente</option>'}</select><div class="grid2"><div><label>Fecha</label><input id="fDate" type="date" value="${a?.date||today()}" required></div><div><label>Hora</label><input id="fTime" type="time" value="${a?.time||'08:00'}" required></div></div><div class="grid2"><div><label>Número de sesión</label><input id="fSession" type="number" min="1" value="${a?.session||1}" required></div><div><label>Tipo</label><select id="fType"><option ${a?.type==='Personal'?'selected':''}>Personal</option><option ${a?.type==='IPS'?'selected':''}>IPS</option></select></div></div><div class="grid2"><div><label>Estado</label><select id="fStatus">${['Programada','Confirmada','Realizada','Cancelada','Reprogramada'].map(x=>`<option ${x===a?.status?'selected':''}>${x}</option>`).join('')}</select></div><div><label>Estado del pago</label><select id="fPayment">${['Pendiente','Pagada','Abono'].map(x=>`<option ${x===a?.payment?'selected':''}>${x}</option>`).join('')}</select></div></div><label>Observaciones</label><textarea id="fNotes">${esc(a?.notes||'')}</textarea><button class="primary" style="width:100%;margin-top:12px">Guardar</button>${a?'<button type="button" class="secondary" style="width:100%;margin-top:8px;color:#a53e3e" onclick="deleteAppointment()">Eliminar</button>':''}</form>`;$('modal').classList.add('open')}
+function saveAppointment(e){e.preventDefault();let p=patient($('fPatient').value);if(!p){toast('Primero crea un paciente.');return}let old=editing?db.appointments.find(x=>x.id===editing):null,a=old||{id:uid()};Object.assign(a,{patientId:p.id,patientName:p.name,date:$('fDate').value,time:$('fTime').value,session:+$('fSession').value,type:$('fType').value,status:$('fStatus').value,payment:$('fPayment').value,notes:$('fNotes').value,rate:$('fStatus').value==='Realizada'?Number(p.rate):Number(old?.rate||0)});if(!old)db.appointments.push(a);save();closeModal();render();toast('Cita guardada')}
+function deleteAppointment(){if(confirm('¿Eliminar esta cita?')){db.appointments=db.appointments.filter(x=>x.id!==editing);save();closeModal();render();toast('Cita eliminada')}}
+function newPatient(){editPatient(null)}
+function editPatient(id){editing=id;let p=id?patient(id):null;$('modalTitle').textContent=p?'Editar paciente':'Nuevo paciente';$('modalBody').innerHTML=`<form onsubmit="savePatient(event)"><label>Nombre completo</label><input id="pName" value="${esc(p?.name||'')}" required><div class="grid2"><div><label>Edad</label><input id="pAge" type="number" min="0" value="${p?.age||''}"></div><div><label>Teléfono</label><input id="pPhone" type="tel" value="${esc(p?.phone||'')}" required></div></div><label>Diagnóstico</label><input id="pDiagnosis" value="${esc(p?.diagnosis||'')}"><div class="grid2"><div><label>Total sesiones</label><input id="pTotal" type="number" min="1" value="${p?.total||10}" required></div><div><label>Tipo</label><select id="pType"><option ${p?.type!=='IPS'?'selected':''}>Particular</option><option ${p?.type==='IPS'?'selected':''}>IPS</option></select></div></div><label>Valor por terapia (COP)</label><input id="pRate" type="number" min="0" value="${p?.rate||db.rates[p?.type||'Particular']}" required><label>Contacto de emergencia</label><input id="pEmergency" type="tel" value="${esc(p?.emergency||'')}"><label>Observaciones</label><textarea id="pNotes">${esc(p?.notes||'')}</textarea><button class="primary" style="width:100%;margin-top:12px">Guardar</button>${p?'<button type="button" class="secondary" style="width:100%;margin-top:8px;color:#a53e3e" onclick="deletePatient()">Eliminar</button>':''}</form>`;$('modal').classList.add('open');$('pType').addEventListener('change',()=>{$('pRate').value=db.rates[$('pType').value]})}
+function savePatient(e){e.preventDefault();let old=editing?patient(editing):null,p=old||{id:uid()};Object.assign(p,{name:$('pName').value.trim(),age:+$('pAge').value||0,phone:$('pPhone').value.trim(),diagnosis:$('pDiagnosis').value.trim(),total:+$('pTotal').value,type:$('pType').value,rate:+$('pRate').value,emergency:$('pEmergency').value.trim(),notes:$('pNotes').value.trim()});if(!old)db.patients.push(p);save();closeModal();render();toast('Paciente guardado')}
+function deletePatient(){if(confirm('¿Eliminar el paciente y sus citas?')){db.patients=db.patients.filter(x=>x.id!==editing);db.appointments=db.appointments.filter(x=>x.patientId!==editing);save();closeModal();render();toast('Paciente eliminado')}}
+function editRate(type){let n=prompt('Nueva tarifa para '+type,db.rates[type]);if(n!==null&&Number(n)>=0){db.rates[type]=Number(n);save();render();toast('Tarifa actualizada')}}
+function closeModal(){$('modal').classList.remove('open');editing=null}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='respaldo-control-de-terapias.json';a.click();URL.revokeObjectURL(a.href);toast('Respaldo exportado')}
+function importData(){$('backupFile').click()}
+function readBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.patients||!x.appointments||!x.rates)throw 0;if(confirm('Esto reemplazará los datos actuales. ¿Continuar?')){db=x;save();render();toast('Respaldo importado')}}catch(_){toast('Archivo de respaldo no válido')}};r.readAsText(f)}
+document.addEventListener('DOMContentLoaded',()=>render());
+</script>
+</body></html>

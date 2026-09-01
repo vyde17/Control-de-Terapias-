@@ -1,0 +1,9 @@
+{
+  "name": "Control de Terapias",
+  "short_name": "Terapias",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5fafb",
+  "theme_color": "#2b8fb8",
+  "lang": "es"
+}
