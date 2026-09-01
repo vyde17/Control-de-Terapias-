@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="es">
-<head>
+<head><link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0ea5e9">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2b8fb8">
@@ -32,8 +33,13 @@ label{display:block;font-size:13px;font-weight:700;margin:10px 0 6px}input,selec
 @keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media(min-width:768px){.nav{max-width:950px;left:50%;right:auto;width:100%;transform:translateX(-50%)}}
 </style>
-</head>
-<body>
+</head><link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0ea5e9">
+<body><script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
 <div class="app"><div class="frame">
 <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
 <div><div class="muted" style="font-size:11px;font-weight:700;letter-spacing:.14em"><span class="gold-dot"></span> FISIOTERAPIA A DOMICILIO</div><h1 class="serif" style="margin:4px 0;font-size:27px">Control de Terapias</h1></div>
